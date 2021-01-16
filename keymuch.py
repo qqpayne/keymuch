@@ -13,7 +13,6 @@ def setHourlyTimer():
     now = datetime.now()
     nextHour = datetime(now.year, now.month, now.day, now.hour+1)
     waitFor = (nextHour-now).seconds+2 # just to be sure
-    print(waitFor)
     saveCallback = Timer(waitFor, save)
     saveCallback.start()
     # then, it sets itself to be executed again after this time 
