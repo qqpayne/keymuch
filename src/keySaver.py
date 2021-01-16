@@ -21,6 +21,9 @@ class Saver:
         except FileNotFoundError:
             with open(self.path, 'w+') as f:
                     f.write(csvHeader)
+        except Exception as e:
+            print(e)
+            os._exit(1)
 
     def checkLastHour(self):
         # if user turns PC off at 22:30, then we record all data collected to "22:00"

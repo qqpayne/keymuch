@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 import signal
+import argparse
 from threading import Timer
 from src.keyKeeper import *
 from src.keySaver import *
 from src.keyHandler import *
 from datetime import datetime
+
+parser = argparse.ArgumentParser()
+parser.add_argument('path', type=str, help="Path to log file (including filename)")
 
 def setHourlyTimer():
     global saveCallback, renewalCallback
@@ -31,7 +35,8 @@ def main():
     handler = Handler(keeper)
 
 if __name__ == "__main__":
-    path = 'logfile.csv'
+    args = parser.parse_args()
+    path = args.path
 
     def receiveSignal(signalNumber, frame):
         saver.addEntry(currentHour(), keeper.counter)
