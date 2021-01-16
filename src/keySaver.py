@@ -23,6 +23,10 @@ class Saver:
                     f.write(csvHeader)
 
     def checkLastHour(self):
+        # if user turns PC off at 22:30, then we record all data collected to "22:00"
+        # then, if user turns PC on at 22:45, we load data that we wrote at 22:30 to be stored at keeper
+        # and delete last line ("22:00")
+        # it will allow us to keep actual hourly data in keeper at any moment
         lastRecord = lastlines(self.path, 1)[0].split(',')
         if currentHour() == lastRecord[0]:
             removeLines(self.path, 1)
@@ -36,11 +40,3 @@ class Saver:
 
     def flush(self, value):
         self.addEntry(currentHour(), value)
-
-# если юзер вырубает приложение в 22:30, то записи накопившиеся до этого записываются в слот для 22:00
-# потом он запускает его в 22:45, но мы обнаруживаем что слот для 22:00 уже занят
-# в этом случае мы выгружаем эти данные для кипера
-# а сэйвер удаляет эту запись 
-# это уберет необходимость проверять целостность данных при запуске
-# все аварийные события будут просто записывать в текущий слот, а затем мы его будем удалять с выгрузкой данных в RAM
-# идеально!
