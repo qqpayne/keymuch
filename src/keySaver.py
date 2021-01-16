@@ -37,6 +37,3 @@ class Saver:
     def addEntry(self, date, value):
         with open(self.path, 'a') as f:
             f.write('{},{}\n'.format(date, value))
-
-    def flush(self, value):
-        self.addEntry(currentHour(), value)

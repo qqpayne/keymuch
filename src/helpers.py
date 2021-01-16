@@ -38,8 +38,8 @@ def removeLines(name, number):
         if count < number + 1:
             return 1 # it will leave file empty
 
-def currentHour():
+def currentHour(offset = 0):
     now = datetime.now()
-    return "{}-{}-{} {}:00:00.000000".format(now.year,now.month,now.day,now.hour)
+    return "{}-{}-{} {}:00:00".format(now.year,now.month,now.day,now.hour+offset)
 
 
