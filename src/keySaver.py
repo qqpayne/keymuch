@@ -31,7 +31,7 @@ class Saver:
         # and delete last line ("22:00")
         # it will allow us to keep actual hourly data in keeper at any moment
         lastRecord = lastlines(self.path, 1)[0].split(',')
-        if currentHour() == lastRecord[0]:
+        if str(currentHour()) == str(lastRecord[0]):
             removeLines(self.path, 1)
             return int(lastRecord[1])
         else:

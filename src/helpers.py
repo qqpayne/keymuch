@@ -40,6 +40,6 @@ def removeLines(name, number):
 
 def currentHour(offset = 0):
     now = datetime.now()
-    return "{}-{}-{} {}:00:00".format(now.year,now.month,now.day,now.hour+offset)
+    return datetime(now.year, now.month, now.day, now.hour+offset)
 
 
