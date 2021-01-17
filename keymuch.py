@@ -38,14 +38,21 @@ if __name__ == "__main__":
     args = parser.parse_args()
     path = args.path
 
+    catched = False
     def receiveSignal(signalNumber, frame):
-        saver.addEntry(currentHour(), keeper.counter)
-        saveCallback.cancel()
-        renewalCallback.cancel()
-        exit()
+        global catched
+        if catched == False:
+            catched = True
+            saver.addEntry(currentHour(), keeper.counter)
+            saveCallback.cancel()
+            renewalCallback.cancel()
+            exit()
 
     signal.signal(signal.SIGINT, receiveSignal)
+    signal.signal(signal.SIGTSTP, receiveSignal)
+    signal.signal(signal.SIGHUP, receiveSignal)
     signal.signal(signal.SIGQUIT, receiveSignal)
     signal.signal(signal.SIGTERM, receiveSignal)
-    
+    signal.signal(signal.SIGPIPE, receiveSignal)
+
     main()
