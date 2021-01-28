@@ -1,34 +1,29 @@
 #!/usr/bin/env python3
-import signal
 import argparse
-from threading import Timer
+import atexit
+import signal
+from pytz import utc
+from datetime import datetime
+from apscheduler.schedulers.background import BackgroundScheduler
 from src.keyKeeper import *
 from src.keySaver import *
 from src.keyHandler import *
-from datetime import datetime
+
+scheduler = BackgroundScheduler(timezone=utc, misfire_grace_time=3659)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('path', type=str, help="Path to log file (including filename)")
 
-def setHourlyTimer():
-    global saveCallback, renewalCallback
-    # firstly, it check how much time left until next hour
-    # and sets timer to commit save after this time
-    now = datetime.now()
-    nextHour = datetime(now.year, now.month, now.day, now.hour+1)
-    waitFor = (nextHour-now).seconds+2 # just to be sure
-    saveCallback = Timer(waitFor, save)
-    saveCallback.start()
-    # then, it sets itself to be executed again after this time 
-    renewalCallback = Timer(waitFor+1, setHourlyTimer)
-    renewalCallback.start()
-
+@scheduler.scheduled_job('cron', id='saverJob', hour='*', coalesce=True)
 def save():
     saver.addEntry(currentHour(-1), keeper.counter)
     keeper.counter = 0
 
+@atexit.register
+def emergencySave():
+    saver.addEntry(currentHour(), keeper.counter)
+
 def main():
-    setHourlyTimer()
     global saver, keeper, handler
     saver = Saver(path)
     keeper = Keeper(saver.lastValue)
@@ -38,15 +33,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     path = args.path
 
-    catched = False
     def receiveSignal(signalNumber, frame):
-        global catched
-        if catched == False:
-            catched = True
-            saver.addEntry(currentHour(), keeper.counter)
-            saveCallback.cancel()
-            renewalCallback.cancel()
-            exit()
+        exit()
 
     signal.signal(signal.SIGINT, receiveSignal)
     signal.signal(signal.SIGTSTP, receiveSignal)
@@ -54,5 +42,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGQUIT, receiveSignal)
     signal.signal(signal.SIGTERM, receiveSignal)
     signal.signal(signal.SIGPIPE, receiveSignal)
-
+    
+    scheduler.start()
+    atexit.register(lambda: scheduler.shutdown())
     main()
